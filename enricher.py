@@ -40,14 +40,18 @@ def check_abuse_ipdb(ip):
         'Accept': 'application/json',
         'Key': config.ABUSEIPDB_API_KEY
     }
-    params = {'ipAddress': ip, 'maxAgeInDays': '90'}
+    params = {'ipAddress': ip, 'maxAgeInDays': '90', 'verbose': 'true'}
     try:
         response = requests.get(config.ABUSEIPDB_URL, headers=headers, params=params, timeout=10)
         if response.status_code == 200:
             res_data = response.json()['data']
             return {
                 "abuse_score": res_data['abuseConfidenceScore'],
-                "isp": res_data.get('isp', 'Unknown')
+                "isp": res_data.get('isp', 'Unknown'),
+                "usage_type": res_data.get('usageType', 'Unknown'),
+                "total_reports": res_data.get('totalReports', 0),
+                "last_reported": res_data.get('lastReportedAt', 'Never'),
+                "domain": res_data.get('domain', 'Unknown')
             }
     except Exception as e:
         print(f"[-] Error querying AbuseIPDB for {ip}: {e}")

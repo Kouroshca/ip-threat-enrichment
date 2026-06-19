@@ -1,4 +1,12 @@
-1.1.1.1
+# Known malicious (from public threat intel)
+185.220.101.45
+193.32.162.157
+45.33.32.156
+ 
+# Suspicious ranges
+198.199.119.239
+167.71.13.196
+ 
+# Likely clean (Google DNS, Cloudflare)
 8.8.8.8
-185.220.101.5
-45.133.1.2
+1.1.1.1
