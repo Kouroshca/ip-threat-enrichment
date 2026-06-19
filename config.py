@@ -4,7 +4,7 @@ import os
 
 #keys of virus total and abuseIP 
 VT_API_KEY = os.environ.get("VT_API_KEY")
-ABUSEIPDB_API_KEY = os.environ.get("ABUSEIPCB_API_KEY") 
+ABUSEIPDB_API_KEY = os.environ.get("ABUSE_API_KEY") 
 
 # TI endpoints
 VT_URL = "https://www.virustotal.com/api/v3/ip_addresses/"

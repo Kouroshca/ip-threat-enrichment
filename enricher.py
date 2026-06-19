@@ -43,8 +43,10 @@ def check_abuse_ipdb(ip):
     params = {'ipAddress': ip, 'maxAgeInDays': '90', 'verbose': 'true'}
     try:
         response = requests.get(config.ABUSEIPDB_URL, headers=headers, params=params, timeout=10)
+        print(f"[DEBUG] AbuseIPDB status code for {ip}: {response.status_code}")
         if response.status_code == 200:
             res_data = response.json()['data']
+            print(f"[DEBUG] score={res_data['abuseConfidenceScore']} isp={res_data.get('isp')} reports={res_data.get('totalReports')}") 
             return {
                 "abuse_score": res_data['abuseConfidenceScore'],
                 "isp": res_data.get('isp', 'Unknown'),
@@ -53,6 +55,8 @@ def check_abuse_ipdb(ip):
                 "last_reported": res_data.get('lastReportedAt', 'Never'),
                 "domain": res_data.get('domain', 'Unknown')
             }
+        else:
+            print(f"[!] AbuseIPDB returned {response.status_code} for {ip}: {response.text}")
     except Exception as e:
         print(f"[-] Error querying AbuseIPDB for {ip}: {e}")
         
@@ -137,7 +141,7 @@ def main():
 
     print("[*] Parsing IP address list...")
     with open(input_file, 'r') as f:
-        ips = [line.strip() for line in f if line.strip()]
+        ips = [line.strip() for line in f if line.strip() and not line.strip().startswith("#")]
         
     results = []
     for idx, ip in enumerate(ips):
