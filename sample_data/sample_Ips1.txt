@@ -1,0 +1,9 @@
+# known malicious
+185.220.101.45
+# clean-ish
+8.8.8.8
+# private — should be skipped
+192.168.1.1
+10.0.0.5
+# duplicate of first
+185.220.101.45

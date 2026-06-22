@@ -1,6 +1,9 @@
 # this is where Im going to do the settings manager.
 
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 #keys of virus total and abuseIP 
 VT_API_KEY = os.environ.get("VT_API_KEY")

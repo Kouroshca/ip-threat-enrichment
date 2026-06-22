@@ -1,13 +1,13 @@
 import config
 
-def evaluate_verdit(vt_result, abuse_result):
+def evaluate_verdict(vt_result, abuse_result):
     vt_status = vt_result.get("status")
     abuse_status = abuse_result.get("status")
 
 # for Uknown 
     if vt_status != "ok" or abuse_status != "ok":
         reasons = []
-        if vt_result != "ok":
+        if vt_status != "ok":
             reasons.append(f"VT: {vt_status}")
         
         if abuse_status != "ok":
@@ -37,6 +37,6 @@ def evaluate_verdit(vt_result, abuse_result):
             f"VT {vt_malicious}/{vt_total} engines | AbuseIPDB {abuse_score}%"
         )
 #clean:
-    return ("Clean", "No Action Is Needed.", f"VT 0/{vt_total} engines | AbuseIPDB {abuse_score}%")
+    return ("Clean", "No Action Is Needed. Log for baseline", f"VT 0/{vt_total} engines | AbuseIPDB {abuse_score}%")
 
     
