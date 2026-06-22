@@ -7,61 +7,61 @@ from jinja2 import Template
 import config 
 
 def check_virus_total(ip):
-    """Queries VirusTotal v3 API for IP reputation."""
+    """Queries VirusTotal v3. Always returns same shape regardless of outcome."""
     if not config.VT_API_KEY:
-        return {"vt_malicious": 0, "vt_total": 0}
-    
+        return {"status": "auth_error", "vt_malicious": 0, "vt_total": 0}
 
     headers = {"x-apikey": config.VT_API_KEY}
-
-    try: 
+    try:
         response = requests.get(f"{config.VT_URL}{ip}", headers=headers, timeout=10)
         if response.status_code == 200:
-            data = response.json()
-            stats = data['data']['attributes']['last_analysis_stats']
-            return{"vt_malicious": stats['malicious'], 
-                   "vt_total": sum(stats.values())
-                   }
+            stats = response.json()['data']['attributes']['last_analysis_stats']
+            return {
+                "status": "ok",
+                "vt_malicious": stats['malicious'],
+                "vt_total": sum(stats.values())
+            }
+        elif response.status_code == 404:
+            return {"status": "not_found", "vt_malicious": 0, "vt_total": 0}
         elif response.status_code == 429:
-            print(f"[!] VT Rate limit hit for {ip}. Skipping...")
+            return {"status": "rate_limited", "vt_malicious": 0, "vt_total": 0}
+        elif response.status_code == 401:
+            return {"status": "auth_error", "vt_malicious": 0, "vt_total": 0}
+        else:
+            return {"status": "error", "vt_malicious": 0, "vt_total": 0}
+    except Exception as e:
+        print(f"[-] VT request failed for {ip}: {e}")
+        return {"status": "error", "vt_malicious": 0, "vt_total": 0}
 
-    except Exception as e: 
-        print(f"[-] Error querying VirusTotal for {ip}: {e}")
 
-    return {"vt_malicious": 0, "vt_total": 0}
-
-# now the abuse IPDB
 def check_abuse_ipdb(ip):
-    """Queries AbuseIPDB v2 API for IP abuse confidence score."""
+    """Queries AbuseIPDB v2. Always returns same shape regardless of outcome."""
     if not config.ABUSEIPDB_API_KEY:
-        return {"abuse_score": 0, "isp": "Unknown"}
-    
-    headers = {
-        'Accept': 'application/json',
-        'Key': config.ABUSEIPDB_API_KEY
-    }
+        return {"status": "auth_error", "abuse_score": 0, "isp": "Unknown"}
+
+    headers = {'Accept': 'application/json', 'Key': config.ABUSEIPDB_API_KEY}
     params = {'ipAddress': ip, 'maxAgeInDays': '90', 'verbose': 'true'}
     try:
         response = requests.get(config.ABUSEIPDB_URL, headers=headers, params=params, timeout=10)
-        print(f"[DEBUG] AbuseIPDB status code for {ip}: {response.status_code}")
         if response.status_code == 200:
-            res_data = response.json()['data']
-            print(f"[DEBUG] score={res_data['abuseConfidenceScore']} isp={res_data.get('isp')} reports={res_data.get('totalReports')}") 
+            d = response.json()['data']
             return {
-                "abuse_score": res_data['abuseConfidenceScore'],
-                "isp": res_data.get('isp', 'Unknown'),
-                "usage_type": res_data.get('usageType', 'Unknown'),
-                "total_reports": res_data.get('totalReports', 0),
-                "last_reported": res_data.get('lastReportedAt', 'Never'),
-                "domain": res_data.get('domain', 'Unknown')
+                "status": "ok",
+                "abuse_score": d['abuseConfidenceScore'],
+                "isp": d.get('isp', 'Unknown'),
+                "total_reports": d.get('totalReports', 0),
+                "last_reported": d.get('lastReportedAt', 'Never'),
+                "country": d.get('countryCode', 'Unknown')
             }
+        elif response.status_code == 429:
+            return {"status": "rate_limited", "abuse_score": 0, "isp": "Unknown"}
+        elif response.status_code == 401:
+            return {"status": "auth_error", "abuse_score": 0, "isp": "Unknown"}
         else:
-            print(f"[!] AbuseIPDB returned {response.status_code} for {ip}: {response.text}")
+            return {"status": "error", "abuse_score": 0, "isp": "Unknown"}
     except Exception as e:
-        print(f"[-] Error querying AbuseIPDB for {ip}: {e}")
-        
-    return {"abuse_score": 0, "isp": "Unknown"}
-
+        print(f"[-] AbuseIPDB request failed for {ip}: {e}")
+        return {"status": "error", "abuse_score": 0, "isp": "Unknown"}
 def evaluate_verdict(vt_malicious, abuse_score):
     """Applies thresholds from config.py to classify the threat level."""
     if vt_malicious >= config.VT_MALICIOUS_THRESHOLD or abuse_score >= 50:

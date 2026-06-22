@@ -13,3 +13,5 @@ ABUSEIPDB_URL = "https://api.abuseipdb.com/api/v2/check"
 # telling TIs how to classify the IP comparing to the points they get.
 ABUSE_SUSPICIOUS_THRESHOLD = 20
 VT_MALICIOUS_THRESHOLD = 3
+ABUSE_MALICIOUS_THRESHOLD = 80 # to fix bug of abuseIP db.
+CACHE_TTL_HOURS = 24
