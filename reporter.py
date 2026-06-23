@@ -1,5 +1,7 @@
 import time
 from jinja2 import Template
+import pycountry
+
 
 HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -25,7 +27,7 @@ HTML_TEMPLATE = """
     </style>
 </head>
 <body>
-    <h1>🛡 SOC Triage Intelligence Report</h1>
+    <h1>SOC Triage Intelligence Report</h1>
     <p>Generated: {{ timestamp }}</p>
 
     <div class="summary">
@@ -68,6 +70,16 @@ HTML_TEMPLATE = """
 </html>
 """
 
+def get_country_name(code):
+    if not code or code == "Unknown":
+        return "Unknown"
+    
+    try: 
+        return pycountry.countries.get(alpha_2 = code).name
+    except AttributeError:
+        return code
+    
+
 def generate_report(results, output_path = "triage_report.html"):
     # this part takes the list of result dicts from main.py and renders the HTML report.
     counts = {
@@ -77,6 +89,7 @@ def generate_report(results, output_path = "triage_report.html"):
         "Unknown": 0
     }
     for row in results:
+        row["Country"] = get_country_name(row.get("Country", "Unknonw"))
         verdict = row.get("Verdict", "Unknown")
         if verdict in counts:
             counts[verdict] += 1
