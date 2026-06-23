@@ -36,7 +36,7 @@ def get_cached(ip):
     if age_hours > config.CACHE_TTL_HOURS:
         return None
     
-    return json.loads((vt_result), json.Loads(abuse_result))
+    return json.loads(vt_result), json.loads(abuse_result)
 
 def save_to_cache(ip, vt_result, abuse_result):
     

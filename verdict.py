@@ -37,6 +37,10 @@ def evaluate_verdict(vt_result, abuse_result):
             f"VT {vt_malicious}/{vt_total} engines | AbuseIPDB {abuse_score}%"
         )
 #clean:
-    return ("Clean", "No Action Is Needed. Log for baseline", f"VT 0/{vt_total} engines | AbuseIPDB {abuse_score}%")
+    return (
+    "Clean",
+    "No action required. Log for baseline.",
+    f"VT 0/{vt_total} engines | AbuseIPDB {abuse_score}%"
+)
 
     
